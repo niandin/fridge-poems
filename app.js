@@ -1,67 +1,30 @@
-// ── POET LIST ──
-// These are poets from the bactra.org list that PoetryDB covers.
-// To add more poets: add their name exactly as PoetryDB knows them to this array.
-// You can check available authors at: https://poetrydb.org/author
-const POET_NAMES = [
-  "Emily Bronte",
-  "Robert Burns",
-  "George Gordon, Lord Byron",
-  "Lewis Carroll",
-  "John Donne",
-  "Ralph Waldo Emerson",
-  "Robert Frost",
-  "A. E. Housman",
-  "Robinson Jeffers",
-  "Rudyard Kipling",
-  "Archibald MacLeish",
-  "Edna St. Vincent Millay",
-  "Ezra Pound",
-  "Christina Rossetti",
-  "Carl Sandburg",
-  "Wallace Stevens",
-  "Walt Whitman",
-  "William Carlos Williams",
-  "William Butler Yeats",
-];
-
-// Display name overrides — cosmetic only
-const DISPLAY_NAMES = {
-  "George Gordon, Lord Byron": "Lord Byron",
-  "Emily Bronte": "Emily Brontë",
-};
-
 // ── STATE ──
-let poetsData = {};   // { poetName: [{title, lines}] }
+let allAuthors = [];   // full list from PoetryDB
+let poetsData = {};    // { authorName: [{title, lines}] } — loaded on demand
 let activePoet = null;
 let activePoem = null;
 let currentLines = [];
 let draggingTile = null;
 let dragOX = 0, dragOY = 0;
 
-// ── LOAD ALL POETS ──
-async function loadAllPoets() {
-  await Promise.all(
-    POET_NAMES.map(async (name) => {
-      try {
-        const res = await fetch(
-          `https://poetrydb.org/author/${encodeURIComponent(name)}/title,lines`
-        );
-        const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
-          data.sort((a, b) => a.title.localeCompare(b.title));
-          poetsData[name] = data;
-        }
-      } catch (e) {
-        // silently skip if API fails for a poet
-      }
-    })
-  );
-  renderSidebar();
-}
-
-// ── HELPERS ──
-function displayName(name) {
-  return DISPLAY_NAMES[name] || name;
+// ── LOAD ALL AUTHORS ON START ──
+// Instead of a hardcoded list, we fetch the full author list from PoetryDB.
+// Poems are loaded lazily — only when a poet is clicked.
+async function init() {
+  try {
+    const res = await fetch('https://poetrydb.org/author');
+    const data = await res.json();
+    // API returns { "authors": ["Name", ...] }
+    allAuthors = (data.authors || []).sort((a, b) => {
+      // Sort by last name
+      const lastName = name => name.split(' ').pop();
+      return lastName(a).localeCompare(lastName(b));
+    });
+    renderSidebar();
+  } catch (e) {
+    document.getElementById('poetList').innerHTML =
+      '<div class="loading-poets" style="color:#c00">Could not reach PoetryDB. Check your connection.</div>';
+  }
 }
 
 // ── SIDEBAR ──
@@ -70,43 +33,32 @@ function renderSidebar() {
   const list = document.getElementById('poetList');
   list.innerHTML = '';
 
-  const loaded = POET_NAMES.filter(n => poetsData[n]);
+  const filtered = allAuthors.filter(name =>
+    !q || name.toLowerCase().includes(q)
+  );
 
-  if (loaded.length === 0) {
-    list.innerHTML = '<div class="loading-poets">loading poets...</div>';
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="loading-poets">no poets found</div>';
     return;
   }
 
-  loaded.forEach((name) => {
-    const dname = displayName(name);
-    if (q && !dname.toLowerCase().includes(q)) return;
-
+  filtered.forEach((name) => {
     const wrap = document.createElement('div');
 
     // Poet button
     const pb = document.createElement('button');
     pb.className = 'poet-btn' + (activePoet === name ? ' active' : '');
-    pb.innerHTML = `<span>${dname}</span><span class="chevron">${activePoet === name ? '&#9650;' : '&#9660;'}</span>`;
-    pb.onclick = () => {
-      activePoet = activePoet === name ? null : name;
-      renderSidebar();
-    };
+    pb.innerHTML = `<span>${name}</span><span class="chevron">${activePoet === name ? '&#9650;' : '&#9660;'}</span>`;
+    pb.onclick = () => togglePoet(name);
 
-    // Poem list
+    // Poem list (empty until loaded)
     const pe = document.createElement('div');
     pe.className = 'poem-entries' + (activePoet === name ? ' open' : '');
+    pe.id = 'poems-' + name.replace(/\s+/g, '-');
 
-    (poetsData[name] || []).forEach((poem, pmi) => {
-      const btn = document.createElement('button');
-      btn.className = 'poem-btn' + (activePoet === name && activePoem === pmi ? ' active' : '');
-      btn.textContent = poem.title;
-      btn.title = poem.title;
-      btn.onclick = (e) => {
-        e.stopPropagation();
-        showPoem(name, pmi);
-      };
-      pe.appendChild(btn);
-    });
+    if (activePoet === name) {
+      renderPoemList(pe, name);
+    }
 
     wrap.appendChild(pb);
     wrap.appendChild(pe);
@@ -114,11 +66,70 @@ function renderSidebar() {
   });
 }
 
+async function togglePoet(name) {
+  if (activePoet === name) {
+    activePoet = null;
+    renderSidebar();
+    return;
+  }
+
+  activePoet = name;
+  renderSidebar();
+
+  // Load poems if not cached
+  if (!poetsData[name]) {
+    const pe = document.getElementById('poems-' + name.replace(/\s+/g, '-'));
+    if (pe) pe.innerHTML = '<div style="padding:8px 14px 8px 24px;font-family:var(--tile-font);font-size:12px;color:var(--mid)">loading...</div>';
+
+    try {
+      const res = await fetch(`https://poetrydb.org/author/${encodeURIComponent(name)}/title,lines`);
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        data.sort((a, b) => a.title.localeCompare(b.title));
+        poetsData[name] = data;
+      } else {
+        poetsData[name] = [];
+      }
+    } catch (e) {
+      poetsData[name] = [];
+    }
+
+    // Re-render just the poem list
+    const pe2 = document.getElementById('poems-' + name.replace(/\s+/g, '-'));
+    if (pe2) renderPoemList(pe2, name);
+  }
+}
+
+function renderPoemList(container, name) {
+  container.innerHTML = '';
+  const poems = poetsData[name];
+
+  if (!poems || poems.length === 0) {
+    container.innerHTML = '<div style="padding:8px 14px 8px 24px;font-family:var(--tile-font);font-size:12px;color:var(--mid)">no poems found</div>';
+    return;
+  }
+
+  poems.forEach((poem, pmi) => {
+    const btn = document.createElement('button');
+    btn.className = 'poem-btn' + (activePoet === name && activePoem === pmi ? ' active' : '');
+    btn.textContent = poem.title;
+    btn.title = poem.title;
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      showPoem(name, pmi);
+    };
+    container.appendChild(btn);
+  });
+}
+
 // ── SHOW POEM ──
 function showPoem(name, pmi) {
-  activePoet = name;
   activePoem = pmi;
-  renderSidebar();
+
+  // Update active state on poem buttons
+  document.querySelectorAll('.poem-btn').forEach((b, i) => {
+    b.classList.toggle('active', i === pmi);
+  });
 
   const poem = poetsData[name][pmi];
   currentLines = poem.lines;
@@ -126,12 +137,11 @@ function showPoem(name, pmi) {
   document.getElementById('readerEmpty').style.display = 'none';
   document.getElementById('readerContent').style.display = 'block';
   document.getElementById('displayTitle').textContent = poem.title;
-  document.getElementById('displayAuthor').textContent = displayName(name);
+  document.getElementById('displayAuthor').textContent = name;
 
-  // Render lines — empty lines become stanza breaks
+  // Render lines
   const container = document.getElementById('poemText');
   container.innerHTML = '';
-
   poem.lines.forEach(line => {
     if (line.trim() === '') {
       const br = document.createElement('div');
@@ -144,7 +154,6 @@ function showPoem(name, pmi) {
     }
   });
 
-  // Scroll reader to top
   document.getElementById('reader').scrollTop = 0;
 }
 
@@ -162,19 +171,15 @@ function extractWords(lines) {
     .filter(w => w.length > 2 && !STOPWORDS.has(w) && /^[a-z]/.test(w));
 
   const unique = [...new Set(words)];
-
-  // Shuffle
   for (let i = unique.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [unique[i], unique[j]] = [unique[j], unique[i]];
   }
-
   return unique.slice(0, 60);
 }
 
 function throwOnFridge() {
   if (!currentLines.length) return;
-
   const fridge = document.getElementById('fridge');
   fridge.querySelectorAll('.tile').forEach(t => t.remove());
   document.getElementById('fridgeMsg').style.display = 'none';
@@ -208,9 +213,7 @@ function tileDown(e) {
   document.addEventListener('mouseup', tileUp);
 }
 
-function tileMove(e) {
-  if (draggingTile) move(e.clientX, e.clientY);
-}
+function tileMove(e) { if (draggingTile) move(e.clientX, e.clientY); }
 
 function tileUp() {
   if (!draggingTile) return;
@@ -235,10 +238,7 @@ function tileTouchDown(e) {
 
 function tileTouchMove(e) {
   e.preventDefault();
-  if (draggingTile) {
-    const t = e.touches[0];
-    move(t.clientX, t.clientY);
-  }
+  if (draggingTile) { const t = e.touches[0]; move(t.clientX, t.clientY); }
 }
 
 function tileTouchUp() {
@@ -265,9 +265,7 @@ const main = document.querySelector('.main');
 let resizing = false, resY = 0, resH = 0;
 
 handle.addEventListener('mousedown', e => {
-  resizing = true;
-  resY = e.clientY;
-  resH = reader.offsetHeight;
+  resizing = true; resY = e.clientY; resH = reader.offsetHeight;
   document.body.style.cursor = 'row-resize';
   document.body.style.userSelect = 'none';
 });
@@ -285,5 +283,5 @@ document.addEventListener('mouseup', () => {
   document.body.style.userSelect = '';
 });
 
-// ── INIT ──
-loadAllPoets();
+// ── START ──
+init();
