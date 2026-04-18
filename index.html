@@ -11,7 +11,7 @@
 <div class="root">
   <header>
     <h1>fridge poems</h1>
-    <span>read a poem &rarr; throw it on the fridge &rarr; make something</span>
+    <span class="header-sub">read a poem &rarr; throw it on the fridge &rarr; make something</span>
   </header>
   <div class="body">
 
@@ -50,8 +50,23 @@
 
       <!-- FRIDGE -->
       <div class="fridge" id="fridge">
+        <!-- infinite canvas layer -->
+        <div class="fridge-canvas" id="fridgeCanvas"></div>
+
         <div class="fridge-empty-msg" id="fridgeMsg">
-          your fridge is empty<br>open a poem and click &ldquo;+ throw on fridge&rdquo;
+          your fridge is empty<br>open a poem and click &ldquo;+ throw on fridge&rdquo;<br>
+          <span style="font-size:13px;opacity:0.7">two-finger scroll to pan &middot; drag tiles anywhere</span>
+        </div>
+
+        <!-- SESSION TRACKER -->
+        <div class="session-panel collapsed" id="sessionPanel">
+          <div class="session-header" onclick="toggleSessionPanel()">
+            <span>this session <span class="session-count" id="sessionCount">0</span></span>
+            <span class="session-toggle-icon" id="sessionToggleIcon">+</span>
+          </div>
+          <div class="session-list" id="sessionList">
+            <div class="session-empty">no poems yet</div>
+          </div>
         </div>
       </div>
 
