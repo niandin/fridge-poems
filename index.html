@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>fridge poems</title>
+<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="root">
+  <header>
+    <h1>fridge poems</h1>
+    <span>read a poem &rarr; throw it on the fridge &rarr; make something</span>
+  </header>
+  <div class="body">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-head">poets</div>
+      <div class="sidebar-search">
+        <input type="text" id="searchInput" placeholder="search..." oninput="renderSidebar()">
+      </div>
+      <div class="poet-list" id="poetList">
+        <div class="loading-poets">loading poets...</div>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+
+      <!-- READER -->
+      <div class="reader" id="reader" style="height:50%">
+        <div class="reader-empty" id="readerEmpty">&larr; select a poet, then a poem</div>
+        <div id="readerContent" style="display:none">
+          <div class="poem-title-display" id="displayTitle"></div>
+          <div class="poem-author-display" id="displayAuthor"></div>
+          <button class="fridge-btn" onclick="throwOnFridge()">+ throw on fridge</button>
+          <div class="poem-text" id="poemText"></div>
+        </div>
+      </div>
+
+      <!-- DRAG HANDLE -->
+      <div class="drag-handle" id="dragHandle">
+        <div class="drag-dots">
+          <div class="drag-dot"></div><div class="drag-dot"></div><div class="drag-dot"></div>
+          <div class="drag-dot"></div><div class="drag-dot"></div>
+        </div>
+      </div>
+
+      <!-- FRIDGE -->
+      <div class="fridge" id="fridge">
+        <div class="fridge-empty-msg" id="fridgeMsg">
+          your fridge is empty<br>open a poem and click &ldquo;+ throw on fridge&rdquo;
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

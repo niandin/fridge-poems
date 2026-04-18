@@ -1,0 +1,309 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --black: #111;
+  --white: #fff;
+  --mid: #888;
+  --light: #ddd;
+  --tile-font: 'Courier Prime', monospace;
+  --body-font: 'IM Fell English', serif;
+  --ui-font: 'IM Fell English SC', serif;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--white);
+  color: var(--black);
+}
+
+/* ── HEADER ── */
+header {
+  height: 44px;
+  border-bottom: 1px solid var(--black);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+header h1 {
+  font-family: var(--ui-font);
+  font-size: 18px;
+  font-weight: normal;
+  letter-spacing: 0.05em;
+}
+
+header span {
+  font-family: var(--tile-font);
+  font-size: 12px;
+  color: var(--mid);
+}
+
+/* ── ROOT LAYOUT ── */
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 230px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--black);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sidebar-head {
+  padding: 12px 14px 8px;
+  font-family: var(--ui-font);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--mid);
+  border-bottom: 1px solid var(--light);
+  flex-shrink: 0;
+}
+
+.sidebar-search {
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--light);
+  flex-shrink: 0;
+}
+
+.sidebar-search input {
+  width: 100%;
+  border: 1px solid var(--light);
+  padding: 5px 8px;
+  font-family: var(--tile-font);
+  font-size: 13px;
+  outline: none;
+  background: var(--white);
+}
+
+.sidebar-search input:focus {
+  border-color: var(--black);
+}
+
+.poet-list {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.poet-list::-webkit-scrollbar { width: 3px; }
+.poet-list::-webkit-scrollbar-thumb { background: var(--light); }
+
+.loading-poets {
+  padding: 20px 14px;
+  font-family: var(--tile-font);
+  font-size: 12px;
+  color: var(--mid);
+}
+
+.poet-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  text-align: left;
+  padding: 9px 14px;
+  font-family: var(--body-font);
+  font-size: 14px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--light);
+  cursor: pointer;
+  color: var(--black);
+  transition: background 0.1s;
+}
+
+.poet-btn:hover { background: #f5f5f5; }
+.poet-btn.active { background: var(--black); color: var(--white); }
+.poet-btn .chevron { font-size: 10px; opacity: 0.4; }
+
+.poem-entries {
+  display: none;
+  flex-direction: column;
+  background: #f9f9f9;
+  border-bottom: 1px solid var(--light);
+}
+
+.poem-entries.open { display: flex; }
+
+.poem-btn {
+  padding: 7px 14px 7px 24px;
+  font-family: var(--tile-font);
+  font-size: 12px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid #ececec;
+  text-align: left;
+  cursor: pointer;
+  color: #555;
+  transition: background 0.1s, color 0.1s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.poem-btn:hover { background: #ececec; color: var(--black); }
+.poem-btn.active { color: var(--black); font-weight: 700; background: #ececec; }
+
+/* ── MAIN ── */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* ── READER ── */
+.reader {
+  overflow-y: auto;
+  padding: 28px 36px;
+  flex-shrink: 0;
+}
+
+.reader::-webkit-scrollbar { width: 4px; }
+.reader::-webkit-scrollbar-thumb { background: var(--light); }
+
+.reader-empty {
+  font-family: var(--body-font);
+  font-style: italic;
+  color: var(--mid);
+  font-size: 16px;
+}
+
+.poem-title-display {
+  font-family: var(--ui-font);
+  font-size: 20px;
+  margin-bottom: 4px;
+  letter-spacing: 0.03em;
+}
+
+.poem-author-display {
+  font-family: var(--tile-font);
+  font-size: 12px;
+  color: var(--mid);
+  margin-bottom: 16px;
+  letter-spacing: 0.05em;
+}
+
+.fridge-btn {
+  font-family: var(--tile-font);
+  font-size: 12px;
+  padding: 5px 12px;
+  background: var(--black);
+  color: var(--white);
+  border: none;
+  cursor: pointer;
+  margin-bottom: 24px;
+  letter-spacing: 0.04em;
+  transition: opacity 0.15s;
+}
+
+.fridge-btn:hover { opacity: 0.7; }
+
+.poem-text {
+  font-family: var(--body-font);
+  font-size: 16px;
+  line-height: 1.9;
+}
+
+.poem-text p { margin-bottom: 0.1em; }
+.poem-text .stanza-break { height: 0.9em; }
+
+/* ── DRAG HANDLE ── */
+.drag-handle {
+  height: 8px;
+  background: var(--white);
+  border-top: 1px solid var(--black);
+  border-bottom: 1px solid var(--black);
+  cursor: row-resize;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+.drag-handle:hover { background: #f5f5f5; }
+.drag-dots { display: flex; gap: 3px; }
+.drag-dot { width: 3px; height: 3px; background: var(--mid); border-radius: 50%; }
+
+/* ── FRIDGE ── */
+.fridge {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: var(--white);
+  background-image:
+    linear-gradient(var(--light) 1px, transparent 1px),
+    linear-gradient(90deg, var(--light) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.fridge-empty-msg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--body-font);
+  font-style: italic;
+  font-size: 15px;
+  color: #ccc;
+  pointer-events: none;
+  text-align: center;
+  padding: 20px;
+  line-height: 1.7;
+}
+
+/* ── TILES ── */
+.tile {
+  position: absolute;
+  font-family: var(--tile-font);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 3px 8px;
+  background: var(--white);
+  border: 1.5px solid var(--black);
+  cursor: grab;
+  user-select: none;
+  white-space: nowrap;
+  box-shadow: 1.5px 1.5px 0 var(--black);
+  z-index: 10;
+  transition: box-shadow 0.08s;
+}
+
+.tile:hover { box-shadow: 3px 3px 0 var(--black); z-index: 20; }
+.tile.dragging { cursor: grabbing; box-shadow: 5px 5px 0 var(--black); z-index: 50; }
+
+.tile.inv {
+  background: var(--black);
+  color: var(--white);
+  box-shadow: 1.5px 1.5px 0 #555;
+}
+
+.tile.inv:hover { box-shadow: 3px 3px 0 #555; }
+.tile.inv.dragging { box-shadow: 5px 5px 0 #555; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 600px) {
+  .sidebar { width: 180px; }
+  header span { display: none; }
+}
