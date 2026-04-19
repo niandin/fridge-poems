@@ -262,8 +262,7 @@ let tooltipEl = null;
 
 // ── INIT ──
 async function init() {
-  buildThemePicker();
-  buildHeaderExtras();
+  initThemePicker();
   setupCanvas();
 
   try {
@@ -326,45 +325,21 @@ function updateCanvasTransform() {
   document.getElementById('fridgeCanvas').style.transform = `translate(${canvasX}px, ${canvasY}px)`;
 }
 
-// ── HEADER EXTRAS ──
-function buildHeaderExtras() {
-  const header = document.querySelector('header');
-
-  const potd = document.createElement('button');
-  potd.className = 'header-btn';
-  potd.textContent = 'poet of the day';
-  potd.onclick = showPoetOfTheDay;
-
-  const addWord = document.createElement('button');
-  addWord.className = 'header-btn';
-  addWord.textContent = '+ add word';
-  addWord.onclick = () => {
-    const word = prompt('Add a word to the fridge:');
-    if (word && word.trim()) addCustomTile(word.trim());
-  };
-
-  const clearBtn = document.createElement('button');
-  clearBtn.className = 'header-btn';
-  clearBtn.textContent = 'clear fridge';
-  clearBtn.onclick = clearFridge;
-
-  const resetView = document.createElement('button');
-  resetView.className = 'header-btn';
-  resetView.textContent = 'reset view';
-  resetView.onclick = () => { canvasX = 0; canvasY = 0; updateCanvasTransform(); };
-
-  header.appendChild(potd);
-  header.appendChild(addWord);
-  header.appendChild(clearBtn);
-  header.appendChild(resetView);
+// ── STANDALONE HEADER ACTIONS (called from HTML) ──
+function showAddWord() {
+  const word = prompt('Add a word to the fridge:');
+  if (word && word.trim()) addCustomTile(word.trim());
 }
 
-// ── THEME PICKER ──
-function buildThemePicker() {
-  const header = document.querySelector('header');
-  const picker = document.createElement('div');
-  picker.className = 'theme-picker';
+function resetView() {
+  canvasX = 0; canvasY = 0;
+  updateCanvasTransform();
+}
 
+// ── THEME PICKER (populate the #themePicker div already in HTML) ──
+function initThemePicker() {
+  const picker = document.getElementById('themePicker');
+  if (!picker) return;
   Object.entries(THEMES).forEach(([key, theme]) => {
     const btn = document.createElement('button');
     btn.className = 'theme-btn' + (key === currentTheme ? ' active' : '');
@@ -373,8 +348,6 @@ function buildThemePicker() {
     btn.onclick = () => setTheme(key);
     picker.appendChild(btn);
   });
-
-  header.appendChild(picker);
 }
 
 function setTheme(key) {
