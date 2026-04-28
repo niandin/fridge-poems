@@ -692,3 +692,15 @@ body[data-theme="dark"] .session-item { border-color: #222; }
   z-index: 5;
   letter-spacing: 0.02em;
 }
+
+/* ── ABOUT BUTTON ── */
+button.header-btn[onclick="openAbout()"] {
+  background: #faf6ee;
+  border-color: #c8bfa8;
+  color: #6b5c40;
+}
+button.header-btn[onclick="openAbout()"]:hover {
+  background: #f5efe0;
+  border-color: #a89070;
+  color: #4a3c28;
+}
