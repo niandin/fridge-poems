@@ -621,9 +621,9 @@ body[data-theme="dark"] .session-item { border-color: #222; }
 .about-overlay.open { display: flex; }
 
 .about-modal {
-  background: var(--white);
-  border: 1px solid var(--black);
-  box-shadow: 6px 6px 0 var(--black);
+  background: #faf6ee;
+  border: 1px solid #c8bfa8;
+  box-shadow: 6px 6px 0 #c8bfa8;
   max-width: 560px;
   width: 100%;
   padding: 40px 44px;
@@ -679,3 +679,16 @@ body[data-theme="dark"] .session-item { border-color: #222; }
 }
 
 .about-body a:hover { opacity: 0.6; }
+
+/* ── FRIDGE HINT ── */
+.fridge-hint {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-family: var(--tile-font);
+  font-size: 11px;
+  color: #bbb;
+  pointer-events: none;
+  z-index: 5;
+  letter-spacing: 0.02em;
+}
